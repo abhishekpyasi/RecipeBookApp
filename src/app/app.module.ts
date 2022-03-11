@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
+
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { RecipesComponent } from './recipes/recipes.component';
@@ -10,6 +11,7 @@ import { RecipeItemComponent } from './recipes/recipe-list/recipe-item/recipe-it
 import { ShoppingListComponent } from './shopping-list/shopping-list.component';
 import { ShoppingEditComponent } from './shopping-list/shopping-edit/shopping-edit.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';   // <- TypeScript import
+
 import { DropdownDirective } from './shared/dropdown.directive';
 import { shoppingListService } from './shopping-list/shoppinglist.service';
 import { AppRoutingModule } from './app-routing.module';
@@ -17,6 +19,11 @@ import { RouterModule } from '@angular/router';
 import { RecipeStartComponent } from './recipes/recipe-start/recipe-start.component';
 import { RecipeEditComponent } from './recipes/recipe-edit/recipe-edit.component';
 import { RecipeService } from './recipes/recipe.service';
+import {HttpClientModule} from '@angular/common/http';
+import { dataStorageService } from './shared/data-storage.service';
+import { RecipeResolverService } from './recipes/Recipe-resolver.service';
+import { AuthComponent } from './Auth/auth.component';
+
 
 
 @NgModule({
@@ -30,17 +37,25 @@ import { RecipeService } from './recipes/recipe.service';
     DropdownDirective,
     RecipeStartComponent,
     RecipeEditComponent,
+    AuthComponent
   ],
   imports: [
     RouterModule,
-    BrowserModule,
+    BrowserModule,  
     FormsModule,
+    
     AppRoutingModule,
     ReactiveFormsModule,
+    HttpClientModule
+    ,
+    
+    
+    
+    
     
     
   ],
-  providers: [shoppingListService,RecipeService],
+  providers: [shoppingListService,RecipeService,dataStorageService,RecipeResolverService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
