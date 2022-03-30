@@ -23,6 +23,7 @@ import {HttpClientModule} from '@angular/common/http';
 import { dataStorageService } from './shared/data-storage.service';
 import { RecipeResolverService } from './recipes/Recipe-resolver.service';
 import { AuthComponent } from './Auth/auth.component';
+import { AuthGuardService } from './Auth/Auth-guard.service';
 
 
 
@@ -55,7 +56,7 @@ import { AuthComponent } from './Auth/auth.component';
     
     
   ],
-  providers: [shoppingListService,RecipeService,dataStorageService,RecipeResolverService],
+  providers: [shoppingListService,RecipeService,dataStorageService,RecipeResolverService,AuthGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

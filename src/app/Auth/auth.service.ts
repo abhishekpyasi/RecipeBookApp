@@ -1,7 +1,9 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { throwError } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { Router } from "@angular/router";
+import { BehaviorSubject, Subject, throwError } from "rxjs";
+import { catchError, tap } from "rxjs/operators";
+import { User } from "./user.model";
 
  export interface responsepayload {
 
@@ -13,12 +15,26 @@ import { catchError } from "rxjs/operators";
     registered? :string
 
 
+
+
  }
 
 @Injectable({providedIn : 'root'})
 export class AuthService {
 
-    constructor(private http: HttpClient){}
+    user = new BehaviorSubject<User>(null);
+    private tokenExpirationCounter: any;
+
+
+    constructor(private http: HttpClient,private router :Router){}
+
+    logout(){
+
+        this.user.next(null);
+        this.router.navigate(['./auth'])
+
+    localStorage.removeItem('userData')
+    }
 signUp(email :string, password: string){
 
 
@@ -43,12 +59,66 @@ signUp(email :string, password: string){
 
     }*/
     
-   this.handleError ))
+   this.handleError ),tap( resData =>{
+
+    this.handleAuthentication(resData.email, resData.localId, resData.idToken,+resData.expiresIn)
+       
+   }))
 
 
 
 }
 
+private handleAuthentication(email: string, localId: string, token : string, expiresIn : number){
+
+    const expDate = new Date(new Date().getTime() + +expiresIn * 1000  )
+    const user = new User (email,localId,token,expDate);
+    this.user.next(user);
+    this.autoLogout(expiresIn * 1000)
+    localStorage.setItem('userData',JSON.stringify(user))
+    if(this.tokenExpirationCounter){
+
+        clearTimeout(this.tokenExpirationCounter)
+    }
+
+    this.tokenExpirationCounter=null;
+
+
+
+
+}
+
+autoLogout(expirationDuration: number){
+    console.log(expirationDuration)
+
+    this.tokenExpirationCounter= setTimeout(()=>{
+
+        this.logout();
+    },expirationDuration)
+
+    
+}
+
+autoLogin(){
+
+    const userData : {email:string, id:string, _token : string, _tokenExpiryDate: string} =JSON.parse(localStorage.getItem('userData'))
+    if(!userData) {
+    return
+    }
+
+    const loadeduser = new User(userData.email,userData.id,userData._token,new Date(userData._tokenExpiryDate))
+
+    if(loadeduser.token){
+
+
+
+        this.user.next(loadeduser)
+        const expirationDuration = new Date(userData._tokenExpiryDate).getTime() - new Date().getTime()
+        this.autoLogout(expirationDuration)
+    }
+
+
+}
 private handleError(errorRes : HttpErrorResponse)
 {
 
@@ -76,7 +146,11 @@ login(email: string, password :string){
 
     return this.http.post<responsepayload>("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBr3aYnOuU8JA7K4Ov1xaZ7vOLE7YWzE4U" , {email: email,password:password,returnSecuretoken : true})
 
-    .pipe(catchError(this.handleError))
+    .pipe(catchError(this.handleError),tap( resData =>{
+
+        this.handleAuthentication(resData.email, resData.localId, resData.idToken,+resData.expiresIn)
+           
+       }))
 
 }
 
